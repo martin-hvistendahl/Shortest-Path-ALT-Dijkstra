@@ -1,9 +1,12 @@
 import heapq
 import pickle
 import pandas as pd
-import os
 
-def dijkstra1(graph, start):
+# Laster inn grafen fra den serialiserte filen
+with open('graf.pkl', 'rb') as f:
+    graf = pickle.load(f)
+
+def dijkstra(graph, start):
     distances = {node: float('infinity') for node in graph}
     distances[start] = 0
     priority_queue = [(0, start)]
@@ -36,22 +39,31 @@ def omvend_graf(graph):
             omvendt[neighbor].append((node, weight))
     return omvendt
 
-def alt_preprosessering_til(graph, landemerke):
-    avstand_til_landemerker = dijkstra1(graph, landemerke)
+def alt_preprosessering_fra(graph, landemerke):
+    avstand_fra_landemerker = dijkstra(graph, landemerke)
+    return avstand_fra_landemerker
+
+def alt_prefrosessering_til(graph, landemerke):
+    omvendt_graph = omvend_graf(graph)
+    avstand_til_landemerker = dijkstra(omvendt_graph, landemerke)
     return avstand_til_landemerker
 
 
 
-landemerker = [918769]#, 894067, 5770561, 2438190, 412001, 5436444]
+landemerker = [918769, 894067, 5770561, 2438190, 412001, 5436444]
+
+
 # Etter at du har kjørt alt_preprosessering
 for landemerke in landemerker:
-    file='fra_{landemerke}.pkl'.format(landemerke=landemerke)
-    with open(file, 'rb') as f:
-        graf = pickle.load(f)
-    print(type(graf))  # Sjekk typen til graf
-    print(list(graf.items())[:5])    
-    omvendt_graph = omvend_graf(graf)
-    avstand_til_landemerker = alt_preprosessering_til(omvendt_graph, landemerke)
-    name='til_{landemerke}.pkl'.format(landemerke=landemerke)
-    with open(name, 'wb') as f:
-        pickle.dump(avstand_til_landemerker, f)
+    avstand_fra_landemerke = alt_preprosessering_fra(graf, landemerke)
+    avstand_til_landemerke = alt_prefrosessering_til(graf, landemerke)
+
+    df_fra = pd.DataFrame.from_dict(avstand_fra_landemerke, orient='index', columns=['Avstand'])
+    df_fra.to_csv(f'fra_{landemerke}.csv')
+
+    df_til = pd.DataFrame.from_dict(avstand_til_landemerke, orient='index', columns=['Avstand'])
+    df_til.to_csv(f'til_{landemerke}.csv')
+
+    
+
+
