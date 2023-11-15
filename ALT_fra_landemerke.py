@@ -40,9 +40,17 @@ landemerker = [918769]#, 894067, 5770561, 2438190, 412001, 5436444]
 for landemerke in landemerker:
     avstand_fra_landemerker = alt_preprosessering_fra(graf, landemerke)
     name='fra_{landemerke}.pkl'.format(landemerke=landemerke)
-    df_til = pd.DataFrame.from_dict(avstand_fra_landemerker)
+
+    # Transform the dictionary to a list of dictionaries, each with a single key-value pair
+    data = [{"node": node, "distance": distance} for node, distance in avstand_fra_landemerker.items()]
+
+    # Create the DataFrame with an explicit index
+    df_til = pd.DataFrame(data)
+    df_til.set_index('node', inplace=True)
+
+    # Save to pickle file
     df_til.to_pickle(name)
-    
+
     
     
 
