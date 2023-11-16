@@ -1,7 +1,7 @@
 import heapq
 import pandas as pd
 import pickle
-
+import time 
 with open('graf.pkl', 'rb') as f:
     graf = pickle.load(f)
 # Load the precomputed distances from the CSV files
@@ -15,14 +15,17 @@ def load_precomputed_distances(landmarks):
 
 # Heuristic function for the A* search that uses landmark distances
 def heuristic(node, goal, distances_from, distances_to):
-    # Use the triangle inequality to compute the heuristic
     h = 0
     for landmark in distances_from:
-        # Ensure you are getting a single value from the DataFrame, not a Series
-        pi_s = distances_from[landmark].loc[node].item()
-        pi_t = distances_to[landmark].loc[goal].item()
-        h = max(h, abs(pi_s - pi_t))
+        if node in distances_from[landmark].index and goal in distances_to[landmark].index:
+            pi_s = distances_from[landmark].loc[node].item()
+            pi_t = distances_to[landmark].loc[goal].item()
+            h = max(h, abs(pi_s - pi_t))
+        else:
+            # Handle the missing data case, perhaps by setting a default value or skipping the landmark
+            continue
     return h
+
 
 
 # A* search algorithm
@@ -62,10 +65,12 @@ landemerker = [918769, 894067, 5770561, 2438190, 412001, 5436444]
 distances_from, distances_to = load_precomputed_distances(landemerker)
 
 # Run the A* search algorithm with the ALT heuristic
-start_node = 6441311  # Replace with actual start node
-goal_node = 3168086   # Replace with actual goal node
+start_node = 5009309  # Replace with actual start node
+goal_node = 999080   # Replace with actual goal node
+start_time=time.time()
 shortest_distances, path, behandlet_noder = a_star_search(graf, start_node, goal_node, distances_from, distances_to)
-
+end_time=time.time()
+tot_tid=end_time-start_time
 # Calculate time assuming shortest_distances[end_node[i]] is in tenths of seconds
 tid = shortest_distances[goal_node] / 100
 timer = int(tid // 3600)
@@ -73,6 +78,5 @@ minutter = int((tid % 3600) // 60)
 sekunder = int(tid % 60)
 tid_formatert = f"{timer:02d}:{minutter:02d}:{sekunder:02d}"
 
-print(f"Path from {start_node} to {goal_node}: {len(path)}")
-print(f"Total nodes processed: {behandlet_noder}")
-print(f"Formatted time: {tid_formatert}")
+print(f"Korteste vei fra {start_node} til {goal_node} er {len(path)} noder lang og tar {tid_formatert}. Antall behandlet noder: {behandlet_noder}. A* tar {tot_tid} sekunder.")
+

@@ -57,9 +57,9 @@ def dijkstra_for_interessepunkter(graph, start, interessepunkter, max_antall, ty
 
     return funnet_interessepunkter
 
-noder=[2266026]
+noder=[3240367]
 interessepunkter = les_interessepunkter('interessepkt.txt')
-type= 'ladestasjon'
+type= 'spisested'
 for node in noder:
     nærmeste_ladestasjon = dijkstra_for_interessepunkter(graf, node, interessepunkter, 5, type)
     kordinater=hent_kordinat(nærmeste_ladestasjon)
